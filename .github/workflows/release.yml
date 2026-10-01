@@ -1,0 +1,47 @@
+name: Publish release
+
+on:
+  push:
+    branches: [main]
+    paths: ['dist/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_REPO: ${{ github.repository }}
+          RELEASE_COMMIT: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          version=$(cat dist/version.txt)
+          [[ "$version" =~ ^0\.1\.[0-9]+$ ]] || { echo 'Invalid version'; exit 1; }
+          cd dist
+          sha256sum --check SHA256SUMS
+          test "$(unzip -Z1 focus-windows-x64.zip)" = 'focus.exe'
+          tag="v$version"
+          if gh release view "$tag" --repo "$RELEASE_REPO" --json isDraft > release.json 2>/dev/null; then
+            if [ "$(jq -r .isDraft release.json)" = false ]; then
+              echo "Release $tag already published"
+              exit 0
+            fi
+            gh release upload "$tag" focus-windows-x64.zip SHA256SUMS --clobber --repo "$RELEASE_REPO"
+          else
+            gh release create "$tag" focus-windows-x64.zip SHA256SUMS \
+              --repo "$RELEASE_REPO" --target "$RELEASE_COMMIT" --draft \
+              --title "Focus $version" \
+              --notes 'Windows 10/11 x64. Extraia o ZIP e execute focus.exe. Atualizações também estão disponíveis pelo painel do aplicativo.'
+          fi
+          gh release edit "$tag" --repo "$RELEASE_REPO" --draft=false --latest
