@@ -1,6 +1,16 @@
 # Focus para Windows
 
-Baixe o ZIP da [versão mais recente](https://github.com/alandecastros/focus-releases/releases/latest), extraia e abra `focus.exe`.
+Baixe **Focus-Setup.exe** na [versão mais recente](https://github.com/alandecastros/focus-releases/releases/latest)
+para instalar o Focus. O instalador usa `%LOCALAPPDATA%\Programs\Focus`, sem pedir
+permissão de administrador, e cria um atalho no menu Iniciar. Você pode escolher
+criar um atalho na área de trabalho e abrir o aplicativo ao terminar.
+
+Para desinstalar, use **Configurações > Aplicativos > Focus > Desinstalar**.
+A preferência de atualização é preservada para uma futura reinstalação.
+
+O arquivo `focus-windows-x64.zip` continua disponível como versão portátil:
+extraia e abra `focus.exe`. Versões anteriores à introdução do instalador
+disponibilizam apenas o ZIP.
 
 O Focus mostra uma faixa preta no topo de cada monitor. Passe o mouse para abrir.
 No painel, ative **Atualização automática** para buscar e baixar novas versões ao
@@ -9,7 +19,8 @@ para usar a versão instalada. A preferência começa desativada.
 
 Também é possível usar **Verificar atualização** e instalar manualmente pelo
 painel. Não é preciso autenticar no GitHub. Mantenha o executável em uma pasta
-onde seu usuário tenha permissão de escrita.
+onde seu usuário tenha permissão de escrita. A pasta padrão do instalador já
+permite isso; não é necessário baixar um novo instalador a cada atualização.
 
 Nas versões **0.1.15 ou superiores**, o atualizador usa o proxy configurado no
 Windows, incluindo script PAC e descoberta automática. O HTTPS respeita os

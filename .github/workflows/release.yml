@@ -29,6 +29,16 @@ jobs:
           version=$(cat dist/version.txt)
           [[ "$version" =~ ^0\.1\.[0-9]+$ ]] || { echo 'Invalid version'; exit 1; }
           cd dist
+          payloads=(focus-windows-x64.zip)
+          notes='Windows 10/11 x64. Extraia o ZIP e execute focus.exe. Atualizações também estão disponíveis pelo painel do aplicativo.'
+          # Accept the last portable-only build while the installer rolls out.
+          if [ -f Focus-Setup.exe ]; then
+            payloads+=(Focus-Setup.exe)
+            notes='Windows 10/11 x64. Baixe Focus-Setup.exe para instalar sem administrador, com atalho no menu Iniciar e desinstalador. O ZIP continua disponível como versão portátil e para as atualizações pelo aplicativo.'
+          fi
+          expected_checksums=$(sha256sum "${payloads[@]}")
+          actual_checksums=$(tr -d '\r' < SHA256SUMS)
+          [ "$actual_checksums" = "$expected_checksums" ] || { echo 'Missing or incorrect checksums'; exit 1; }
           sha256sum --check SHA256SUMS
           test "$(unzip -Z1 focus-windows-x64.zip)" = 'focus.exe'
           tag="v$version"
@@ -37,11 +47,11 @@ jobs:
               echo "Release $tag already published"
               exit 0
             fi
-            gh release upload "$tag" focus-windows-x64.zip SHA256SUMS --clobber --repo "$RELEASE_REPO"
+            gh release upload "$tag" "${payloads[@]}" SHA256SUMS --clobber --repo "$RELEASE_REPO"
           else
-            gh release create "$tag" focus-windows-x64.zip SHA256SUMS \
+            gh release create "$tag" "${payloads[@]}" SHA256SUMS \
               --repo "$RELEASE_REPO" --target "$RELEASE_COMMIT" --draft \
               --title "Focus $version" \
-              --notes 'Windows 10/11 x64. Extraia o ZIP e execute focus.exe. Atualizações também estão disponíveis pelo painel do aplicativo.'
+              --notes "$notes"
           fi
           gh release edit "$tag" --repo "$RELEASE_REPO" --draft=false --latest
