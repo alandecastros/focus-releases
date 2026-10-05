@@ -28,6 +28,15 @@ certificados confiáveis do Windows, inclusive os instalados pela TI, e mantém
 a validação de certificados ativa. O login integrado segue as políticas da
 empresa; o Focus não salva senhas corporativas.
 
+A partir da versão **0.1.35**, a consulta e o download de atualizações usam
+arquivos públicos da release, sem depender da quota da API do GitHub compartilhada
+por quem usa o mesmo proxy. O arquivo `update.json` indica a versão e os downloads;
+os arquivos são conferidos com SHA-256 antes da instalação.
+
+Se uma versão antiga apresentar **erro de quota 403**, feche o Focus e instale
+uma vez a versão mais recente pelo navegador com **Focus-Setup.exe**. Depois,
+use normalmente **Verificar atualização**.
+
 Se a versão anterior não conseguir atualizar na rede corporativa, baixe o ZIP
 pelo navegador, feche o Focus e substitua o executável uma vez. Depois use
 **Verificar atualização**. Em caso de falha, clique na mensagem do painel para

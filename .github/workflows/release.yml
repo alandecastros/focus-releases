@@ -42,14 +42,22 @@ jobs:
           sha256sum --check SHA256SUMS
           test "$(unzip -Z1 focus-windows-x64.zip)" = 'focus.exe'
           tag="v$version"
+          # Public static metadata: desktop clients must never need the REST API quota.
+          # Use versioned URLs so discovery and installation cannot mix releases.
+          jq -n --arg version "$version" \
+            --arg base "https://github.com/$RELEASE_REPO/releases/download/$tag" \
+            '{schema: 1, releases: [{version: $version, assets: [
+              {name: "focus-windows-x64.zip", url: ($base + "/focus-windows-x64.zip")},
+              {name: "SHA256SUMS", url: ($base + "/SHA256SUMS")}
+            ]}]}' > update.json
           if gh release view "$tag" --repo "$RELEASE_REPO" --json isDraft > release.json 2>/dev/null; then
             if [ "$(jq -r .isDraft release.json)" = false ]; then
               echo "Release $tag already published"
               exit 0
             fi
-            gh release upload "$tag" "${payloads[@]}" SHA256SUMS --clobber --repo "$RELEASE_REPO"
+            gh release upload "$tag" "${payloads[@]}" SHA256SUMS update.json --clobber --repo "$RELEASE_REPO"
           else
-            gh release create "$tag" "${payloads[@]}" SHA256SUMS \
+            gh release create "$tag" "${payloads[@]}" SHA256SUMS update.json \
               --repo "$RELEASE_REPO" --target "$RELEASE_COMMIT" --draft \
               --title "Focus $version" \
               --notes "$notes"
